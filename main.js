@@ -126,24 +126,7 @@ child.on('message', (msg) => {
         case 'serving':
             core.saveState('pid', msg.pid);
             core.info('server running');
-            process.exit(0);
             break;
     }
     return;
 });
-
-// test if the server was started
-setTimeout(() => {
-    try {
-        process.kill(child.pid, 0);
-        // process is alive but did not send an message
-        core.error(`Error: server was started but never notified its presence.`);
-        child.kill();
-        process.exit(1);
-        return;
-    } catch (e) {
-        // process is dead
-        core.error(`Error: server is dead`);
-        process.exit(1);
-    }
-}, 5000);
