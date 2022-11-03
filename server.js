@@ -2,6 +2,7 @@ const http = require('http');
 const path = require('path');
 const process = require('process');
 const fs = require('fs');
+const crypto = require("crypto");
 
 function deploy(config, ready) {
     const server = http.createServer();
@@ -54,6 +55,31 @@ function deploy(config, ready) {
         }
         const url = new URL(request.url, `http://${request.headers.host}`);
         let requestedFile = path.resolve(path.normalize(path.join(cwd, ...url.pathname.split(path.posix.sep))));
+        
+        
+        if (url.searchParams.has("size")) {
+            const fileSize = Number(url.searchParams.get("size"));
+
+            response.writeHead(200, {
+                'Content-Type': 'text/html',
+                'Content-Length': fileSize
+            });
+
+            response.write(crypto.randomBytes(fileSize).toString('hex').substring(-fileSize));
+            response.end();
+            return;
+
+        }
+
+        const body = '<html><body><h1>It works!</h1></body></html>\n';
+
+        response.writeHead(200, {
+            'Content-Length': Buffer.byteLength(body),
+            'Content-Type': 'text/html'
+        })
+        response.end(body);
+        return;
+        
         if (requestedFile !== root) {
             if (!requestedFile.startsWith(cwd)) {
                 const body = 'Not Found';
